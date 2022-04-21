@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/shyambhavi3/findnearbyplaces-api#readme",
   "dependencies": {
-    "cors": "^2.8.5"
+    "cors": "^2.8.5",
+    "express": "^4.17.3"
   }
 }
