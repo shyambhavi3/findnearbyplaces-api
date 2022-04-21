@@ -4,7 +4,6 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -16,5 +15,8 @@
   "bugs": {
     "url": "https://github.com/shyambhavi3/findnearbyplaces-api/issues"
   },
-  "homepage": "https://github.com/shyambhavi3/findnearbyplaces-api#readme"
+  "homepage": "https://github.com/shyambhavi3/findnearbyplaces-api#readme",
+  "dependencies": {
+    "cors": "^2.8.5"
+  }
 }
