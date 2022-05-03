@@ -120,20 +120,13 @@ app.put('/place', (req, res) => {
         return;
     }
 
-    let id = req.body.place_id;
-
-    if (!id) {
-        res.status(401).json({ done: false, message: 'Please provide a place id' });
-        return;
-    }
-
-    let name = req.body.name;
-    let category_id = req.body.category_id;
-    let latitude = req.body.latitude;
-    let longitude = req.body.longitude;
-    let description = req.body.description;
-    let user_id = req.user.id;
-    console.log(user_id);
+    let id =req.body.place_id? "id = '"+req.body.place_id + "'" : undefined;
+    let name = req.body.name? "name = '"+req.body.name+ "'": undefined;
+    let category_id =req.body.category_id? "category_id = '"+req.body.category_id+ "'": undefined;
+    let latitude = req.body.latitude?"latitude = '"+req.body.latitude+ "'": undefined;
+    let longitude = req.body.longitude?"longitude = '"+req.body.longitude+ "'":undefined;
+    let description = req.body.description?"description = '"+req.body.description+ "'": undefined;
+    let user_id =req.user.id?"customer_id = '"+ req.user.id+ "'":undefined;
 
     store.updatePlace(id, name, category_id, latitude, longitude, description,user_id)
         .then(x => {

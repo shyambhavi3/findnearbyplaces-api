@@ -59,7 +59,20 @@ let store = {
     },
 
     updatePlace: (id, name, category_id, latitude, longitude, description,user_id) => {
-        return pool.query("update findnearbyplaces.location set name = $1, category_id = $2, latitude = $3, longitude = $4, description = $5 where id= $6 and customer_id=$7", [name, category_id, latitude, longitude, description, id,user_id]) 
+        let queryString="update findnearbyplaces.location set ";
+        let array = [id, name, category_id, latitude, longitude, description,user_id];
+        for(let i =0;i<array.length;i++){
+            if(array[i]!=undefined){
+                queryString+=array[i]
+                if(i<array.length-1){
+                    queryString+=',';
+                }
+            }
+            
+
+        }
+        queryString+='where '+id+ " and "+ user_id;
+        return pool.query(queryString); 
 
     },
 
