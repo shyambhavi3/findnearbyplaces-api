@@ -76,6 +76,11 @@ let store = {
 
     },
 
+    deletePlace : (place_id,user_id) =>{
+        return pool.query ('delete from findnearbyplaces.location where id=$1 and customer_id =$2',[place_id,user_id])
+
+    },
+
     getPlaceId: (name)=>{
         return pool.query('select id from findnearbyplaces.location where name = $1',[name]);
     },

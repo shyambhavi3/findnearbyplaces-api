@@ -113,40 +113,7 @@ app.post('/category', (req, res) => {
         });
 })
 
-app.put('/place', (req, res) => {
 
-    if (!req.isAuthenticated()) {
-        res.status(401).json({ done: false, message: 'Please sign in first.' });
-        return;
-    }
-
-    let id =req.body.place_id? "id = '"+req.body.place_id + "'" : undefined;
-    let name = req.body.name? "name = '"+req.body.name+ "'": undefined;
-    let category_id =req.body.category_id? "category_id = '"+req.body.category_id+ "'": undefined;
-    let latitude = req.body.latitude?"latitude = '"+req.body.latitude+ "'": undefined;
-    let longitude = req.body.longitude?"longitude = '"+req.body.longitude+ "'":undefined;
-    let description = req.body.description?"description = '"+req.body.description+ "'": undefined;
-    let user_id =req.user.id?"customer_id = '"+ req.user.id+ "'":undefined;
-
-    store.updatePlace(id, name, category_id, latitude, longitude, description,user_id)
-        .then(x => {
-            console.log(x);
-            if(x.rowCount==0){
-                res.status(200).json({ done: false, message: 'You must be the customer who added the place in order to update it' })
-            }
-            else{
-                res.status(200).json({ done: true, message: 'The place was updated successfully!' })
-            }
-
-            
-
-
-        })
-        .catch(e => {
-            console.log(e);
-            res.status(500).json({ done: false, message: 'Something went wrong' });
-        });
-})
 
 app.post('/place', (req, res) => {
 
@@ -177,6 +144,68 @@ app.post('/place', (req, res) => {
         });
 })
 
+app.put('/place', (req, res) => {
+
+    if (!req.isAuthenticated()) {
+        res.status(401).json({ done: false, message: 'Please sign in first.' });
+        return;
+    }
+
+    let id =req.body.place_id? "id = '"+req.body.place_id + "'" : undefined;
+    let name = req.body.name? "name = '"+req.body.name+ "'": undefined;
+    let category_id =req.body.category_id? "category_id = '"+req.body.category_id+ "'": undefined;
+    let latitude = req.body.latitude?"latitude = '"+req.body.latitude+ "'": undefined;
+    let longitude = req.body.longitude?"longitude = '"+req.body.longitude+ "'":undefined;
+    let description = req.body.description?"description = '"+req.body.description+ "'": undefined;
+    let user_id =req.user.id?"customer_id = '"+ req.user.id+ "'":undefined;
+
+    store.updatePlace(id, name, category_id, latitude, longitude, description,user_id)
+        .then(x => {
+            if(x.rowCount==0){
+                res.status(200).json({ done: false, message: 'You must be the customer who added the place in order to update it' })
+            }
+            else{
+                res.status(200).json({ done: true, message: 'The place was updated successfully!' })
+            }
+
+            
+
+
+        })
+        .catch(e => {
+            console.log(e);
+            res.status(500).json({ done: false, message: 'Something went wrong' });
+        });
+})
+
+app.delete('/place/:place_id', (req,res)=>{
+
+    if (!req.isAuthenticated()) {
+        res.status(401).json({ done: false, message: 'Please sign in first.' });
+        return;
+    }
+
+    let place_id = req.params.place_id;
+    let user_id =req.user.id;
+
+    store.deletePlace(place_id,user_id)
+    .then(x=> {
+        if(x.rowCount==0){
+            res.status(200).json({ done: false, message: 'You must be the customer who added the place in order to delete it' })
+        }else{
+            res.status(200).json({ done: true, message: 'The place was deleted successfully!' })
+
+        }
+        
+    })
+    .catch(e => {
+        console.log(e);
+        res.status(500).json({ done: false, message: 'Something went wrong' });
+    });
+
+
+
+})
 app.post('/review', (req, res) => {
 
     if (!req.isAuthenticated()) {
@@ -221,7 +250,7 @@ app.put('/review', (req, res) => {
 
     store.updateReview(id, text, rating ,user_id)
         .then(x => {
-            console.log(x);
+            
             if(x.rowCount==0){
                 res.status(200).json({ done: false, message: 'You must be the customer who added the review in order to update it' })
             }
@@ -274,7 +303,7 @@ app.put('/photo', (req, res) => {
 
     store.updatePhoto(id, file)
         .then(x => {
-            console.log(x);         
+                 
                 res.status(200).json({ done: true, message: 'The place was updated successfully!' })
         })
         .catch(e => {
