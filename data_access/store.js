@@ -16,6 +16,105 @@ const pool = new Pool(connection);
 
 let store = {
 
+    search :(search_term, user_location, radius_filter, maximum_results_to_return, category_filter, sort)=>{
+        
+        if(category_filter!='null'){
+            queryString=`select 
+
+            findnearbyplaces.location.name as location_name,
+            findnearbyplaces.location.latitude,
+            findnearbyplaces.location.longitude,
+            findnearbyplaces.category.name as category_name,
+            findnearbyplaces.photo.file,
+            avg(cast (findnearbyplaces.review.rating as int))
+            
+            from findnearbyplaces.category 
+            inner join findnearbyplaces.location 
+            on findnearbyplaces.category.id = findnearbyplaces.location.category_id 
+            full join findnearbyplaces.review 
+            on findnearbyplaces.location.id = findnearbyplaces.review.location_id
+            full join findnearbyplaces.place_photo   
+            on findnearbyplaces.place_photo.location_id = findnearbyplaces.location.id
+            full join findnearbyplaces.photo   
+            on findnearbyplaces.place_photo.photo_id = findnearbyplaces.photo.id
+            where findnearbyplaces.location.name like '%`+search_term+`%' or findnearbyplaces.category.name ='`+category_filter+`' 
+            group by location_name, findnearbyplaces.location.latitude,
+            findnearbyplaces.location.longitude,category_name,findnearbyplaces.photo.file 
+            `
+        }else{
+            queryString=`select 
+
+            findnearbyplaces.location.name as location_name,
+            findnearbyplaces.location.latitude,
+            findnearbyplaces.location.longitude,
+            findnearbyplaces.category.name as category_name,
+            findnearbyplaces.photo.file,
+            avg(cast (findnearbyplaces.review.rating as int))
+            
+            from findnearbyplaces.category 
+            inner join findnearbyplaces.location 
+            on findnearbyplaces.category.id = findnearbyplaces.location.category_id 
+            full join findnearbyplaces.review 
+            on findnearbyplaces.location.id = findnearbyplaces.review.location_id
+            full join findnearbyplaces.place_photo   
+            on findnearbyplaces.place_photo.location_id = findnearbyplaces.location.id
+            full join findnearbyplaces.photo   
+            on findnearbyplaces.place_photo.photo_id = findnearbyplaces.photo.id
+            where findnearbyplaces.location.name like '%`+search_term+`%' or findnearbyplaces.category.name like '%`+search_term+`%' 
+            group by location_name, findnearbyplaces.location.latitude,
+            findnearbyplaces.location.longitude,category_name,findnearbyplaces.photo.file 
+            `
+        }   
+        console.log(queryString);
+        return pool.query(queryString)
+        .then(x=>{
+            result = x.rows
+            
+
+            //user location will be in form of latitude:::longitude
+             //saving distance for each location
+            let user_latitiude = user_location.split(":::")[0];
+            let user_longitude = user_location.split(":::")[1];
+            for(let i=0;i<result.length;i++){
+                x=result[i].longitude-user_longitude;
+                y=result[i].latitude-user_latitiude;
+                distance = Math.sqrt(x * x + y * y);
+                result[i].distance=distance
+
+            }
+            
+            //applying radius filter
+            if(radius_filter!='null'){
+                var filtered = result.filter(function(value, index, arr){ 
+                    return value.distance <= radius_filter;
+                });
+
+                result =filtered;
+
+            }
+
+            
+            
+            //applying maximum result filter
+            result = result.slice(0,maximum_results_to_return);
+            
+            //sorting
+            if(sort!='null'){
+                if(sort==0){
+                    return result;
+                }if(sort==1){
+                     result.sort(function(a, b){return a.distance - b.distance});
+                     return result;
+                }if(sort==2){
+                    result.sort(function(a, b){return b.rating - a.rating});
+                     return result;
+                }
+            }
+           
+           
+        })
+
+    },
     addCustomer: (email, password) => {
 
         const hash = bcrypt.hashSync(password, 10);

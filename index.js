@@ -13,13 +13,13 @@ var SQLiteStore = require('connect-sqlite3')(session);
 app.use(cors());
 app.use(express.json());
 
-// app.use((request, response, next) => {
-//     console.log(`request url: ${request.url}`);
-//     console.log(`request method: ${request.method}`);
-//     //only for development. Remove this line when you deploy your final version.
-//     console.log(`request body: ${request.body}`);
-//     next();
-// })
+app.use((request, response, next) => {
+    console.log(`request url: ${request.url}`);
+    console.log(`request method: ${request.method}`);
+    //only for development. Remove this line when you deploy your final version.
+    console.log(`request body: ${request.body}`);
+    next();
+})
 
 passport.use(new LocalStrategy({ usernameField: 'email' }, function verify(username, password, cb) {
     store.login(username, password)
@@ -88,6 +88,31 @@ app.post('/register', (req, res) => {
             console.log(e);
             res.status(500).json({ done: false, message: 'The email already exists.' });
         });
+
+
+
+
+
+})
+
+app.get('/search/:search_term/:user_location/:radius_filter/:maximum_results_to_return/:category_filter/:sortby', (req,res)=>{
+    let search_term = req.params.search_term;
+    let user_location=req.params.user_location;
+    let radius_filter=req.params.radius_filter;
+    let maximum_results_to_return=req.params.maximum_results_to_return;
+    let category_filter=req.params.category_filter;
+    let sortby = req.params.sortby;
+    console.log(search_term,user_location,radius_filter, maximum_results_to_return, category_filter, sortby);
+
+    store.search(search_term,user_location, radius_filter, maximum_results_to_return, category_filter, sortby)
+    .then(x=>{
+        console.log(x);
+        res.status(200).json({ done: true, result: x});
+    })
+    .catch(e => {
+        console.log(e);
+        res.status(500).json({ done: false, result: 'Something went wrong' });
+    });
 
 
 
