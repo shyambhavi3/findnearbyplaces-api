@@ -115,6 +115,13 @@ let store = {
             }
         })
     },
+    updatePhoto: (id, file) => {
+        let queryString="update findnearbyplaces.photo set "+file;
+        queryString+='where '+id;
+        console.log(queryString);
+        return pool.query(queryString); 
+
+    },
 
     getPhotoId: (photo)=>{
 

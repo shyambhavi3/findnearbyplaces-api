@@ -262,6 +262,28 @@ app.post('/photo', (req, res) => {
 
 })
 
+app.put('/photo', (req, res) => {
+
+    if (!req.isAuthenticated()) {
+        res.status(401).json({ done: false, message: 'Please sign in first.' });
+        return;
+    }
+
+    let id =req.body.photo_id? "id = '"+req.body.photo_id + "'" : undefined;
+    let file = req.body.photo? "file = '"+req.body.photo+ "'": undefined;
+
+    store.updatePhoto(id, file)
+        .then(x => {
+            console.log(x);         
+                res.status(200).json({ done: true, message: 'The place was updated successfully!' })
+        })
+        .catch(e => {
+            console.log(e);
+            res.status(500).json({ done: false, message: 'Something went wrong' });
+        });
+})
+
+
 
 app.get('/', (req, res) => {
     res.status(200).json({ done: true, message: 'Welcome' })
