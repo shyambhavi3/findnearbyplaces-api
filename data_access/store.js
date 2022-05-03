@@ -120,7 +120,7 @@ let store = {
         .then(x=>{
             if(place_id){
                 return pool.query('insert into findnearbyplaces.place_photo (location_id,photo_id) values ($1,$2)',[place_id,x.rows[0].id])
-            }else{
+            }if(review_id){
                 return pool.query('insert into findnearbyplaces.review_photo (review_id,photo_id) values ($1,$2)',[review_id,x.rows[0].id])
             }
         })
@@ -130,6 +130,11 @@ let store = {
         queryString+='where '+id;
         console.log(queryString);
         return pool.query(queryString); 
+
+    },
+
+    deletePhoto : (photo_id) =>{
+        return pool.query ('delete from findnearbyplaces.photo where id=$1',[photo_id])
 
     },
 

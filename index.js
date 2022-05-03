@@ -292,9 +292,6 @@ app.delete('/review/:review_id', (req,res)=>{
         console.log(e);
         res.status(500).json({ done: false, message: 'Something went wrong' });
     });
-
-
-
 })
 
 app.post('/photo', (req, res) => {
@@ -337,6 +334,22 @@ app.put('/photo', (req, res) => {
             console.log(e);
             res.status(500).json({ done: false, message: 'Something went wrong' });
         });
+})
+
+app.delete('/photo/:photo_id', (req,res)=>{
+
+    let photo_id = req.params.photo_id;
+
+    store.deletePhoto(photo_id)
+    .then(x=> {
+
+            res.status(200).json({ done: true, message: 'The photo was deleted successfully!' })
+        
+    })
+    .catch(e => {
+        console.log(e);
+        res.status(500).json({ done: false, message: 'Something went wrong' });
+    });
 })
 
 
