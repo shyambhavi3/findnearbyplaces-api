@@ -268,7 +268,34 @@ app.put('/review', (req, res) => {
         });
 })
 
+app.delete('/review/:review_id', (req,res)=>{
 
+    if (!req.isAuthenticated()) {
+        res.status(401).json({ done: false, message: 'Please sign in first.' });
+        return;
+    }
+
+    let review_id = req.params.review_id;
+    let user_id =req.user.id;
+
+    store.deleteReview(review_id,user_id)
+    .then(x=> {
+        if(x.rowCount==0){
+            res.status(200).json({ done: false, message: 'You must be the customer who added the place in order to delete it' })
+        }else{
+            res.status(200).json({ done: true, message: 'The place was deleted successfully!' })
+
+        }
+        
+    })
+    .catch(e => {
+        console.log(e);
+        res.status(500).json({ done: false, message: 'Something went wrong' });
+    });
+
+
+
+})
 
 app.post('/photo', (req, res) => {
     let photo = req.body.photo;

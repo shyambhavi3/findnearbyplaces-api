@@ -89,6 +89,11 @@ let store = {
         return pool.query('insert into findnearbyplaces.review (location_id,text,rating,customer_id) values ($1,$2,$3,$4)',[location_id,text,rating,customer_id]);
 
     },
+
+    deleteReview : (review_id,user_id) =>{
+        return pool.query ('delete from findnearbyplaces.review where id=$1 and customer_id =$2',[review_id,user_id])
+
+    },
     getReviewId: (location_id,text,rating,customer_id)=>{
         return pool.query('select id from findnearbyplaces.review where location_id = $1 and text= $2 and rating = $3 and customer_id = $4',[location_id,text,rating,customer_id]);
     },
