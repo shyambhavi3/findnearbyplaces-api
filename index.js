@@ -113,39 +113,81 @@ app.post('/category', (req, res) => {
         });
 })
 
-app.post('/place', (req, res) => {
-    
-    if(!req.isAuthenticated()) {
-        res.status(401).json({done: false, message: 'Please sign in first.'});
+app.put('/place', (req, res) => {
+
+    if (!req.isAuthenticated()) {
+        res.status(401).json({ done: false, message: 'Please sign in first.' });
         return;
     }
-    
+
+    let id = req.body.place_id;
+
+    if (!id) {
+        res.status(401).json({ done: false, message: 'Please provide a place id' });
+        return;
+    }
+
     let name = req.body.name;
     let category_id = req.body.category_id;
     let latitude = req.body.latitude;
     let longitude = req.body.longitude;
-    let description= req.body.description;
+    let description = req.body.description;
+    let user_id = req.user.id;
+    console.log(user_id);
+
+    store.updatePlace(id, name, category_id, latitude, longitude, description,user_id)
+        .then(x => {
+            console.log(x);
+            if(x.rowCount==0){
+                res.status(200).json({ done: false, message: 'You must be the customer who added the place in order to update it' })
+            }
+            else{
+                res.status(200).json({ done: true, message: 'The place was updated successfully!' })
+            }
+
+            
+
+
+        })
+        .catch(e => {
+            console.log(e);
+            res.status(500).json({ done: false, message: 'Something went wrong' });
+        });
+})
+
+app.post('/place', (req, res) => {
+
+    if (!req.isAuthenticated()) {
+        res.status(401).json({ done: false, message: 'Please sign in first.' });
+        return;
+    }
+
+    let name = req.body.name;
+    let category_id = req.body.category_id;
+    let latitude = req.body.latitude;
+    let longitude = req.body.longitude;
+    let description = req.body.description;
     let id = req.user.id;
 
     store.addPlace(name, category_id, latitude, longitude, description, id)
-    .then(x => {
-        store.getPlaceId(name)
-            .then(x => {
+        .then(x => {
+            store.getPlaceId(name)
+                .then(x => {
 
-                res.status(200).json({ done: true, id: x.rows[0].id, message: 'The place was added successfully!' })
+                    res.status(200).json({ done: true, id: x.rows[0].id, message: 'The place was added successfully!' })
 
-            })
-    })
-    .catch(e => {
-        console.log(e);
-        res.status(500).json({ done: false, message: 'Something went wrong' });
-    });
+                })
+        })
+        .catch(e => {
+            console.log(e);
+            res.status(500).json({ done: false, message: 'Something went wrong' });
+        });
 })
 
-app.post('/review', (req,res) => {
+app.post('/review', (req, res) => {
 
-    if(!req.isAuthenticated()) {
-        res.status(401).json({done: false, message: 'Please sign in first.'});
+    if (!req.isAuthenticated()) {
+        res.status(401).json({ done: false, message: 'Please sign in first.' });
         return;
     }
 
@@ -154,42 +196,72 @@ app.post('/review', (req,res) => {
     let rating = req.body.review;
     let customer_id = req.user.id;
 
-    store.addReview(location_id,text,rating,customer_id)
-    .then(x => {
-        store.getReviewId(location_id,text,rating,customer_id)
-            .then(x => {
+    store.addReview(location_id, text, rating, customer_id)
+        .then(x => {
+            store.getReviewId(location_id, text, rating, customer_id)
+                .then(x => {
 
-                res.status(200).json({ done: true, id: x.rows[0].id, message: 'The review was added successfully!' })
+                    res.status(200).json({ done: true, id: x.rows[0].id, message: 'The review was added successfully!' })
 
-            })
-    })
-    .catch(e => {
-        console.log(e);
-        res.status(500).json({ done: false, message: 'Something went wrong' });
-    });
+                })
+        })
+        .catch(e => {
+            console.log(e);
+            res.status(500).json({ done: false, message: 'Something went wrong' });
+        });
 
 
 
 })
 
-app.post('/photo',(req,res)=>{
-    let photo =req.body.photo;
+app.put('/review', (req, res) => {
+
+    if (!req.isAuthenticated()) {
+        res.status(401).json({ done: false, message: 'Please sign in first.' });
+        return;
+    }
+
+    let location_id = req.body.place_id;
+    let text = req.body.comment;
+    let rating = req.body.review;
+    let customer_id = req.user.id;
+
+    store.addReview(location_id, text, rating, customer_id)
+        .then(x => {
+            store.getReviewId(location_id, text, rating, customer_id)
+                .then(x => {
+
+                    res.status(200).json({ done: true, id: x.rows[0].id, message: 'The review was added successfully!' })
+
+                })
+        })
+        .catch(e => {
+            console.log(e);
+            res.status(500).json({ done: false, message: 'Something went wrong' });
+        });
+
+
+
+})
+
+app.post('/photo', (req, res) => {
+    let photo = req.body.photo;
     let place_id = req.body.place_id;
     let review_id = req.body.review_id;
 
     store.addPhoto(photo, place_id, review_id)
-    .then(x => {
-        store.getPhotoId(photo)
-            .then(x => {
+        .then(x => {
+            store.getPhotoId(photo)
+                .then(x => {
 
-                res.status(200).json({ done: true, id: x.rows[0].id, message: 'The photo was added successfully!' })
+                    res.status(200).json({ done: true, id: x.rows[0].id, message: 'The photo was added successfully!' })
 
-            })
-    })
-    .catch(e => {
-        console.log(e);
-        res.status(500).json({ done: false, message: 'Something went wrong' });
-    });
+                })
+        })
+        .catch(e => {
+            console.log(e);
+            res.status(500).json({ done: false, message: 'Something went wrong' });
+        });
 
 })
 

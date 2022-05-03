@@ -58,6 +58,11 @@ let store = {
         return pool.query('insert into findnearbyplaces.location (name,category_id, latitude, longitude, description, customer_id) values ($1,$2,$3,$4,$5,$6)',[name,category_id, latitude, longitude, description, customer_id]);
     },
 
+    updatePlace: (id, name, category_id, latitude, longitude, description,user_id) => {
+        return pool.query("update findnearbyplaces.location set name = $1, category_id = $2, latitude = $3, longitude = $4, description = $5 where id= $6 and customer_id=$7", [name, category_id, latitude, longitude, description, id,user_id]) 
+
+    },
+
     getPlaceId: (name)=>{
         return pool.query('select id from findnearbyplaces.location where name = $1',[name]);
     },
