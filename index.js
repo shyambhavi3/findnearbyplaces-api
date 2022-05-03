@@ -186,7 +186,7 @@ app.post('/review', (req, res) => {
 
     let location_id = req.body.place_id;
     let text = req.body.comment;
-    let rating = req.body.review;
+    let rating = req.body.rating;
     let customer_id = req.user.id;
 
     store.addReview(location_id, text, rating, customer_id)
@@ -214,28 +214,32 @@ app.put('/review', (req, res) => {
         return;
     }
 
-    let location_id = req.body.place_id;
-    let text = req.body.comment;
-    let rating = req.body.review;
-    let customer_id = req.user.id;
+    let id =req.body.review_id? "id = '"+req.body.review_id + "'" : undefined;
+    let text = req.body.comment? "text = '"+req.body.comment+ "'": undefined;
+    let rating =req.body.rating? "rating = '"+req.body.rating+ "'": undefined;
+    let user_id =req.user.id?"customer_id = '"+ req.user.id+ "'":undefined;
 
-    store.addReview(location_id, text, rating, customer_id)
+    store.updateReview(id, text, rating ,user_id)
         .then(x => {
-            store.getReviewId(location_id, text, rating, customer_id)
-                .then(x => {
+            console.log(x);
+            if(x.rowCount==0){
+                res.status(200).json({ done: false, message: 'You must be the customer who added the review in order to update it' })
+            }
+            else{
+                res.status(200).json({ done: true, message: 'The place was updated successfully!' })
+            }
 
-                    res.status(200).json({ done: true, id: x.rows[0].id, message: 'The review was added successfully!' })
+            
 
-                })
+
         })
         .catch(e => {
             console.log(e);
             res.status(500).json({ done: false, message: 'Something went wrong' });
         });
-
-
-
 })
+
+
 
 app.post('/photo', (req, res) => {
     let photo = req.body.photo;

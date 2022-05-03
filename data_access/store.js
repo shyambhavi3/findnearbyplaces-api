@@ -87,6 +87,21 @@ let store = {
     getReviewId: (location_id,text,rating,customer_id)=>{
         return pool.query('select id from findnearbyplaces.review where location_id = $1 and text= $2 and rating = $3 and customer_id = $4',[location_id,text,rating,customer_id]);
     },
+    updateReview: (id, text, rating ,user_id) => {
+        let queryString="update findnearbyplaces.review set ";
+        let array = [ id, text, rating ,user_id];
+        for(let i =0;i<array.length;i++){
+            if(array[i]!=undefined){
+                queryString+=array[i]
+                if(i<array.length-1){
+                    queryString+=',';
+                }
+            }
+        }
+        queryString+='where '+id+ " and "+ user_id;
+        return pool.query(queryString); 
+
+    },
 
     addPhoto: (photo, place_id, review_id)=>{
         return pool.query('insert into findnearbyplaces.photo (file) values ($1)',[photo])
