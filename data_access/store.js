@@ -142,6 +142,10 @@ let store = {
 
     },
 
+    getCategory:()=>{
+        return pool.query('select * from findnearbyplaces.category');
+    },
+
     addCategory: (name)=>{
 
 
@@ -241,6 +245,10 @@ let store = {
 
         return pool.query('select id from findnearbyplaces.photo where file= $1',[photo]);
 
+    }
+
+    ,getPhotobyId: (id)=>{
+        return pool.query('select file from findnearbyplaces.photo where id= $1',[id])
     }
 
 

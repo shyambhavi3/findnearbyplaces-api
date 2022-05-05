@@ -7,11 +7,16 @@ var passport = require('passport');
 var LocalStrategy = require('passport-local');
 var session = require('express-session');
 var SQLiteStore = require('connect-sqlite3')(session);
+const fileUpload = require('express-fileupload');
 
 
 //middleware
-app.use(cors());
+app.use(cors({
+    origin: "http://localhost:3000",
+    credentials: true
+  }));
 app.use(express.json());
+app.use(fileUpload());
 
 app.use((request, response, next) => {
     console.log(`request url: ${request.url}`);
@@ -76,6 +81,11 @@ app.get('/login/failed', (request, response) => {
     response.status(401).json({ done: false, message: 'Credentials not valid.' });
 });
 
+app.post('/logout', function (request, response) {
+    request.logout();
+    response.json({ done: true, message: 'The customer signed out successfully.' });
+  });
+
 app.post('/register', (req, res) => {
 
     let email = req.body.email;
@@ -120,6 +130,32 @@ app.get('/search/:search_term/:user_location/:radius_filter/:maximum_results_to_
 
 })
 
+app.get('/image/:id', (request, response) =>{
+    
+    let imageId = request.params.id;
+    
+    store.getPhotobyId(imageId)
+      .then(data => {
+        response.set('Cache-Control', 'no-cache');
+        response.contentType('image/jpg');
+        response.send(data.rows[0].file);
+      })
+      .catch(e => response.status(404).json({ error: `Image ${imageId} was not found.` }));
+  }) 
+
+app.get('/category/',(req,res)=>{
+    store.getCategory()
+    .then(x=>{
+        res.status(200).json({ done: true, category: x.rows})
+
+
+    })
+    .catch(e => {
+        console.log(e);
+        res.status(500).json({ done: false, message: 'Something went wrong' });
+    });
+})
+
 app.post('/category', (req, res) => {
     let name = req.body.name;
 
@@ -147,12 +183,15 @@ app.post('/place', (req, res) => {
         return;
     }
 
+
     let name = req.body.name;
     let category_id = req.body.category_id;
     let latitude = req.body.latitude;
     let longitude = req.body.longitude;
     let description = req.body.description;
     let id = req.user.id;
+
+    
 
     store.addPlace(name, category_id, latitude, longitude, description, id)
         .then(x => {
@@ -320,7 +359,8 @@ app.delete('/review/:review_id', (req,res)=>{
 })
 
 app.post('/photo', (req, res) => {
-    let photo = req.body.photo;
+
+    let photo = req.files.file.data; 
     let place_id = req.body.place_id;
     let review_id = req.body.review_id;
 
