@@ -20,12 +20,13 @@ let store = {
         
         if(category_filter!='null'){
             queryString=`select 
-
+            findnearbyplaces.location.id as location_id,
             findnearbyplaces.location.name as location_name,
             findnearbyplaces.location.latitude,
             findnearbyplaces.location.longitude,
             findnearbyplaces.category.name as category_name,
             findnearbyplaces.photo.file,
+            findnearbyplaces.photo.id as photo_id,
             avg(cast (findnearbyplaces.review.rating as int))
             
             from findnearbyplaces.category 
@@ -39,16 +40,17 @@ let store = {
             on findnearbyplaces.place_photo.photo_id = findnearbyplaces.photo.id
             where findnearbyplaces.location.name like '%`+search_term+`%' or findnearbyplaces.category.name ='`+category_filter+`' 
             group by location_name, findnearbyplaces.location.latitude,
-            findnearbyplaces.location.longitude,category_name,findnearbyplaces.photo.file 
+            findnearbyplaces.location.longitude,category_name,findnearbyplaces.photo.file,findnearbyplaces.photo.id,findnearbyplaces.location.id 
             `
         }else{
             queryString=`select 
-
+            findnearbyplaces.location.id as location_id,
             findnearbyplaces.location.name as location_name,
             findnearbyplaces.location.latitude,
             findnearbyplaces.location.longitude,
             findnearbyplaces.category.name as category_name,
             findnearbyplaces.photo.file,
+            findnearbyplaces.photo.id as photo_id,
             avg(cast (findnearbyplaces.review.rating as int))
             
             from findnearbyplaces.category 
@@ -62,7 +64,7 @@ let store = {
             on findnearbyplaces.place_photo.photo_id = findnearbyplaces.photo.id
             where findnearbyplaces.location.name like '%`+search_term+`%' or findnearbyplaces.category.name like '%`+search_term+`%' 
             group by location_name, findnearbyplaces.location.latitude,
-            findnearbyplaces.location.longitude,category_name,findnearbyplaces.photo.file 
+            findnearbyplaces.location.longitude,category_name,findnearbyplaces.photo.file, findnearbyplaces.photo.id, findnearbyplaces.location.id 
             `
         }   
         console.log(queryString);
@@ -82,6 +84,8 @@ let store = {
                 result[i].distance=distance
 
             }
+
+            
             
             //applying radius filter
             if(radius_filter!='null'){
@@ -94,9 +98,10 @@ let store = {
             }
 
             
-            
             //applying maximum result filter
             result = result.slice(0,maximum_results_to_return);
+
+            
             
             //sorting
             if(sort!='null'){
@@ -110,6 +115,8 @@ let store = {
                      return result;
                 }
             }
+
+            return result;
            
            
         })
@@ -175,12 +182,32 @@ let store = {
 
         }
         queryString+='where '+id+ " and "+ user_id;
-        return pool.query(queryString); 
+        return pool.query(queryString)
+       
 
     },
 
     deletePlace : (place_id,user_id) =>{
-        return pool.query ('delete from findnearbyplaces.location where id=$1 and customer_id =$2',[place_id,user_id])
+        return pool.query ('select * from findnearbyplaces.location where id=$1 and customer_id =$2',[place_id,user_id])
+        .then(x=>{
+            console.log(x);
+            if(x.rowCount>0){
+                return pool.query ('delete from findnearbyplaces.review where location_id=$1',[place_id])
+                .then(x=>{
+                    return pool.query ('delete from findnearbyplaces.place_photo where location_id=$1',[place_id])
+        
+                })
+
+            }
+            
+        })
+
+       
+        .then(x=>{
+            return pool.query ('delete from findnearbyplaces.location where id=$1 and customer_id =$2',[place_id,user_id])
+
+        })
+
 
     },
 
@@ -229,10 +256,8 @@ let store = {
         })
     },
     updatePhoto: (id, file) => {
-        let queryString="update findnearbyplaces.photo set "+file;
-        queryString+='where '+id;
-        console.log(queryString);
-        return pool.query(queryString); 
+        
+        return pool.query('update findnearbyplaces.photo set file = $1 where id= $2',[file,id]); 
 
     },
 
@@ -249,6 +274,11 @@ let store = {
 
     ,getPhotobyId: (id)=>{
         return pool.query('select file from findnearbyplaces.photo where id= $1',[id])
+    },
+
+    getPhotoIdbylocation: (id)=>{
+        console.log('select photo_id from findnearbyplaces.place_photo  where location_'+id);
+        return pool.query('select photo_id from findnearbyplaces.place_photo  where location_'+id);
     }
 
 

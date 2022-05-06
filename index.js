@@ -116,7 +116,7 @@ app.get('/search/:search_term/:user_location/:radius_filter/:maximum_results_to_
 
     store.search(search_term,user_location, radius_filter, maximum_results_to_return, category_filter, sortby)
     .then(x=>{
-        console.log(x);
+        
         res.status(200).json({ done: true, result: x});
     })
     .catch(e => {
@@ -229,7 +229,11 @@ app.put('/place', (req, res) => {
                 res.status(200).json({ done: false, message: 'You must be the customer who added the place in order to update it' })
             }
             else{
-                res.status(200).json({ done: true, message: 'The place was updated successfully!' })
+                store.getPhotoIdbylocation(id)
+                .then(x=>{
+                    res.status(200).json({ done: true, photo_id: x.rows[0].photo_id, message: 'The place was updated successfully!' })
+
+                })
             }
 
             
@@ -364,6 +368,8 @@ app.post('/photo', (req, res) => {
     let place_id = req.body.place_id;
     let review_id = req.body.review_id;
 
+    console.log(photo);
+
     store.addPhoto(photo, place_id, review_id)
         .then(x => {
             store.getPhotoId(photo)
@@ -387,13 +393,13 @@ app.put('/photo', (req, res) => {
         return;
     }
 
-    let id =req.body.photo_id? "id = '"+req.body.photo_id + "'" : undefined;
-    let file = req.body.photo? "file = '"+req.body.photo+ "'": undefined;
+    let id =req.body.photo_id;
+    let file = req.files.file.data;
 
     store.updatePhoto(id, file)
         .then(x => {
                  
-                res.status(200).json({ done: true, message: 'The place was updated successfully!' })
+                res.status(200).json({ done: true, message: 'The photo was updated successfully!' })
         })
         .catch(e => {
             console.log(e);
