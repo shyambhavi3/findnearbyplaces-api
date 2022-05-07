@@ -130,6 +130,20 @@ app.get('/search/:search_term/:user_location/:radius_filter/:maximum_results_to_
 
 })
 
+app.get('/review/:id', (req,res)=>{
+    let location_id = req.params.id;
+
+    store.getReview(location_id)
+    .then(x=>{
+        
+        res.status(200).json({ done: true, result: x.rows});
+    })
+    .catch(e => {
+        console.log(e);
+        res.status(500).json({ done: false, result: 'Something went wrong' });
+    });
+})
+
 app.get('/image/:id', (request, response) =>{
     
     let imageId = request.params.id;

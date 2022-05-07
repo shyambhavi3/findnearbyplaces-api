@@ -215,6 +215,15 @@ let store = {
         return pool.query('select id from findnearbyplaces.location where name = $1',[name]);
     },
 
+    getReview: (location_id)=>{
+        return pool.query(`select * from findnearbyplaces.review inner join 
+        findnearbyplaces.review_photo  on 
+        findnearbyplaces.review.id=findnearbyplaces.review_photo.review_id
+        where
+        findnearbyplaces.review.location_id =`+location_id);
+
+    },
+
     addReview: (location_id,text,rating,customer_id)=>{
         return pool.query('insert into findnearbyplaces.review (location_id,text,rating,customer_id) values ($1,$2,$3,$4)',[location_id,text,rating,customer_id]);
 
