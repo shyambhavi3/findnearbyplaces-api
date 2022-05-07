@@ -192,21 +192,42 @@ let store = {
         .then(x=>{
             console.log(x);
             if(x.rowCount>0){
-                return pool.query ('delete from findnearbyplaces.review where location_id=$1',[place_id])
+                return pool.query('select * from findnearbyplaces.review where location_id =$1',[place_id])
                 .then(x=>{
-                    return pool.query ('delete from findnearbyplaces.place_photo where location_id=$1',[place_id])
-        
-                })
+                    let idString='';
+                    for(let i in x.rows){
+                        idString+='review_id='+x.rows[i].id
+                        if(i<x.rows.length-1){
+                            idString+=' or ';
+                        }
+                    }
+                    return pool.query('delete from  findnearbyplaces.review_photo where '+idString)
+                    .then(x=>{
+                        return pool.query('delete from  findnearbyplaces.review where location_id =$1',[place_id])
+                        .then(x=>{
+                            return pool.query ('delete from findnearbyplaces.place_photo where location_id=$1',[place_id])
+                            .then(x=>{
+                                return pool.query ('delete from findnearbyplaces.location where id=$1 and customer_id =$2',[place_id,user_id])
+                    
+                            })
+                
+                        }
 
-            }
+                    )
+
+                }
+                )
+                
+                
+                
+                
+
+            })
             
-        })
+        }})
 
        
-        .then(x=>{
-            return pool.query ('delete from findnearbyplaces.location where id=$1 and customer_id =$2',[place_id,user_id])
-
-        })
+        
 
 
     },
